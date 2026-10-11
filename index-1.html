@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎈 لعبة الحروف - Letters Game</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎈</text></svg>">
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 55%, #00c6ff 100%);
+  background-attachment: fixed;
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px; min-height: 100vh; color: #2b2b45;
+}
+#app {
+  width: 100%; max-width: 780px;
+  background: #fff; border-radius: 30px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.35);
+  padding: 22px; min-height: 620px;
+  position: relative; overflow: hidden;
+}
+.screen { display: none; }
+.screen.active { display: block; animation: fadeIn .35s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+h1 {
+  font-size: 38px; margin: 10px 0 4px; text-align: center; font-weight: 900;
+  background: linear-gradient(90deg, #6a11cb, #2575fc, #00c6ff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+h2 { text-align: center; font-size: 26px; margin: 8px 0 4px; color: #4a3f8f; }
+.sub { text-align: center; color: #8a8aa3; font-size: 16px; margin: 0 0 10px; }
+.lang-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 34px; }
+.big-btn {
+  border: none; border-radius: 26px; padding: 34px 10px;
+  font-size: 24px; font-weight: 800; cursor: pointer; color: #fff;
+  transition: .2s; box-shadow: 0 10px 24px rgba(0,0,0,.18);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.big-btn span.flag { font-size: 46px; }
+.big-btn:hover { transform: translateY(-5px) scale(1.02); }
+.big-btn:active { transform: scale(.96); }
+.big-btn.ar { background: linear-gradient(135deg, #00b09b, #96c93d); }
+.big-btn.en { background: linear-gradient(135deg, #f7971e, #ffd200); color: #5a3d00; }
+.menu-btn {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; margin: 13px 0; padding: 20px 24px;
+  font-size: 21px; font-weight: 700; border: none; border-radius: 20px;
+  cursor: pointer; color: #fff; transition: .2s; text-align: right;
+  box-shadow: 0 7px 18px rgba(0,0,0,.15);
+}
+.menu-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,.22); }
+.menu-btn:active { transform: scale(.98); }
+.menu-btn .ico { font-size: 28px; }
+.m-learn { background: linear-gradient(135deg, #667eea, #764ba2); }
+.m-practice { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.m-speak { background: linear-gradient(135deg, #ee0979, #ff6a00); }
+.m-quiz { background: linear-gradient(135deg, #f7971e, #ff6b6b); }
+.m-home { background: linear-gradient(135deg, #8e9eab, #667db6); }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; gap: 10px;
+}
+.back-btn {
+  border: none; background: #eef0ff; color: #4a3f8f;
+  padding: 10px 18px; border-radius: 14px; font-size: 16px;
+  font-weight: 700; cursor: pointer; transition: .2s;
+}
+.back-btn:hover { background: #dfe3ff; }
+.hud {
+  background: #f3f4ff; color: #4a3f8f; font-weight: 800;
+  padding: 10px 18px; border-radius: 14px; font-size: 16px;
+}
+.letter-card {
+  background: linear-gradient(135deg, #eef2ff, #fce7f3);
+  border-radius: 28px; padding: 14px; text-align: center;
+  margin-bottom: 14px; position: relative; cursor: pointer;
+  transition: .2s; box-shadow: inset 0 0 0 3px #fff;
+}
+.letter-card:hover { transform: scale(1.01); }
+.letter-big {
+  font-size: 120px; font-weight: 900; line-height: 1.15;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  display: inline-block; user-select: none;
+}
+.word-card {
+  background: linear-gradient(135deg, #fff7e6, #ffe9f3);
+  border-radius: 28px; padding: 16px; text-align: center;
+  cursor: pointer; transition: .2s; box-shadow: inset 0 0 0 3px #fff;
+  margin-bottom: 16px;
+}
+.word-card:hover { transform: scale(1.01); }
+.word-emoji { font-size: 68px; line-height: 1.1; }
+.word-text { font-size: 34px; font-weight: 800; color: #d6336c; margin-top: 4px; }
+.word-text.en { direction: ltr; font-family: 'Segoe UI', Arial, sans-serif; color: #1b6ca8; }
+.nav-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.nav-btn {
+  border: none; border-radius: 18px; padding: 16px;
+  font-size: 19px; font-weight: 800; cursor: pointer;
+  color: #fff; background: linear-gradient(135deg, #667eea, #764ba2);
+  transition: .2s; box-shadow: 0 6px 16px rgba(102,126,234,.4);
+}
+.nav-btn:hover { transform: translateY(-3px); }
+.nav-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.speak-hint { text-align: center; color: #9a9ab5; font-size: 14px; margin-top: 10px; }
+
+/* ===== زر المايكروفون ===== */
+.mic-row {
+  display: flex; justify-content: center; margin: 14px 0 4px;
+}
+.mic-btn {
+  border: none; border-radius: 50%;
+  width: 88px; height: 88px;
+  background: linear-gradient(135deg, #ee0979, #ff6a00);
+  color: #fff; font-size: 40px;
+  cursor: pointer; transition: .2s;
+  box-shadow: 0 8px 22px rgba(238,9,121,.4);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.mic-btn:hover:not(:disabled) { transform: scale(1.06); }
+.mic-btn:active:not(:disabled) { transform: scale(.94); }
+.mic-btn:disabled { opacity: .5; cursor: not-allowed; }
+.mic-btn.listening {
+  animation: pulse 1.2s infinite;
+  background: linear-gradient(135deg, #ff3b30, #ee0979);
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(238,9,121,.7); }
+  70% { box-shadow: 0 0 0 22px rgba(238,9,121,0); }
+  100% { box-shadow: 0 0 0 0 rgba(238,9,121,0); }
+}
+.mic-hint {
+  text-align: center; font-size: 15px;
+  color: #6b6b8a; margin-top: 6px;
+  font-weight: 700; min-height: 22px;
+}
+.mic-hint.ok { color: #1fa84e; }
+.mic-hint.no { color: #e02424; }
+.mic-hint.listen { color: #ee0979; }
+
+/* شارة النتيجة */
+.heard-box {
+  text-align: center; margin-top: 6px;
+  font-size: 15px; color: #6b6b8a;
+  min-height: 20px;
+}
+.heard-box b { color: #4a3f8f; }
+
+/* شاشة الأسئلة */
+.question-text {
+  text-align: center; font-size: 22px; font-weight: 800;
+  color: #4a3f8f; margin: 6px 0 14px; line-height: 1.5;
+}
+.question-text .en-line {
+  display: block; font-size: 15px; color: #9a9ab5;
+  font-weight: 600; direction: ltr;
+}
+.prompt-area {
+  background: linear-gradient(135deg, #eef2ff, #fce7f3);
+  border-radius: 26px; padding: 18px; text-align: center;
+  cursor: pointer; transition: .2s; margin-bottom: 16px;
+  box-shadow: inset 0 0 0 3px #fff;
+}
+.prompt-area:hover { transform: scale(1.01); }
+.prompt-emoji { font-size: 74px; line-height: 1.1; }
+.prompt-word { font-size: 34px; font-weight: 800; color: #d6336c; }
+.prompt-word.en { direction: ltr; color: #1b6ca8; }
+.prompt-letter {
+  font-size: 104px; font-weight: 900; line-height: 1.15;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.options { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.opt {
+  border: 3px solid #e3e5ff; background: #f8f9ff;
+  border-radius: 20px; padding: 16px 10px; cursor: pointer;
+  font-weight: 800; color: #2b2b45; transition: .16s;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; min-height: 88px; font-family: inherit;
+}
+.opt:hover:not(:disabled) { transform: translateY(-4px); border-color: #a5b4ff; background: #eef1ff; }
+.opt:disabled { cursor: default; }
+.letter-opt { font-size: 44px; }
+.word-opt .opt-emoji { font-size: 38px; line-height: 1; }
+.word-opt .opt-word { font-size: 20px; }
+.opt.correct { background: #d9f8dd !important; border-color: #34c759 !important; animation: pop .35s ease; }
+.opt.wrong { background: #ffe0e0 !important; border-color: #ff3b30 !important; animation: shake .35s ease; }
+@keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+.feedback { text-align: center; font-size: 22px; font-weight: 800; margin-top: 14px; min-height: 32px; }
+.feedback.ok { color: #1fa84e; }
+.feedback.no { color: #e02424; }
+.result-box { text-align: center; padding: 18px 6px; }
+.result-stars { font-size: 58px; letter-spacing: 8px; }
+.result-score {
+  font-size: 46px; font-weight: 900; margin: 12px 0;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.result-msg { font-size: 22px; font-weight: 700; color: #4a3f8f; margin-bottom: 22px; }
+.warn-box {
+  background: #fff4e5; color: #a05a00;
+  border: 2px solid #ffd48a; border-radius: 16px;
+  padding: 12px 16px; margin: 10px 0; font-size: 14px;
+  text-align: center; font-weight: 700;
+}
+@media (max-width: 520px) {
+  #app { padding: 16px; border-radius: 22px; min-height: 560px; }
+  h1 { font-size: 28px; }
+  .letter-big { font-size: 88px; }
+  .prompt-letter { font-size: 78px; }
+  .prompt-emoji { font-size: 56px; }
+  .word-emoji { font-size: 52px; }
+  .word-text { font-size: 26px; }
+  .opt { min-height: 76px; }
+  .letter-opt { font-size: 36px; }
+  .big-btn { padding: 26px 8px; font-size: 20px; }
+  .menu-btn { font-size: 18px; padding: 17px 18px; }
+  .question-text { font-size: 19px; }
+  .mic-btn { width: 76px; height: 76px; font-size: 34px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ================= الشاشة الرئيسية ================= -->
+  <section id="screen-home" class="screen active">
+    <h1>🎈 لعبة الحروف 🎈</h1>
+    <p class="sub">تعلّم الحروف العربية والإنجليزية باللعب والنطق<br>
+      <span style="direction:ltr;display:inline-block">Learn Arabic &amp; English Letters</span>
+    </p>
+    <div class="lang-btns">
+      <button class="big-btn ar" onclick="startLang('ar')">
+        <span class="flag">🇸🇦</span> العربية
+      </button>
+      <button class="big-btn en" onclick="startLang('en')">
+        <span class="flag">🇬🇧</span> English
+      </button>
+    </div>
+    <p class="speak-hint" style="margin-top:34px">
+      🔊 تأكد من رفع صوت الجهاز للاستماع إلى النطق<br>
+      🎤 للتصحيح الصوتي استخدم Chrome / Edge
+    </p>
+  </section>
+
+  <!-- ================= شاشة القائمة ================= -->
+  <section id="screen-menu" class="screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="showScreen('home')">🏠 الرئيسية</button>
+      <span class="hud" id="menu-lang">العربية</span>
+    </div>
+    <h2 id="menu-title">اختر النشاط</h2>
+    <p class="sub" id="menu-sub">ماذا تريد أن تتعلم اليوم؟</p>
+
+    <button class="menu-btn m-learn" onclick="startLearn()">
+      <span class="ico">📖</span> تعلّم الحروف والكلمات
+    </button>
+    <button class="menu-btn m-speak" onclick="startSpeak()">
+      <span class="ico">🎤</span> تدرّب على النطق (جديد!)
+    </button>
+    <button class="menu-btn m-practice" onclick="startGame('practice')">
+      <span class="ico">✏️</span> تدريبات ممتعة
+    </button>
+    <button class="menu-btn m-quiz" onclick="startGame('quiz')">
+      <span class="ico">🏆</span> اختبار وجمع النجوم
+    </button>
+  </section>
+
+  <!-- ================= شاشة التعلم ================= -->
+  <section id="screen-learn" class="screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="stopAll(); showScreen('menu')">⬅ رجوع</button>
+      <span class="hud" id="learn-progress">1 / 28</span>
+    </div>
+
+    <div class="letter-card" id="letter-card" onclick="speakCurrentLetter()">
+      <div class="letter-big" id="learn-letter">أ</div>
+    </div>
+
+    <div class="word-card" id="word-card" onclick="speakCurrentWord()">
+      <div class="word-emoji" id="learn-emoji">🦁</div>
+      <div class="word-text" id="learn-word">أسد</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="prev-btn" onclick="prevLetter()">⬅ السابق</button>
+      <button class="nav-btn" id="next-btn" onclick="nextLetter()">التالي ➡</button>
+    </div>
+    <p class="speak-hint">👆 اضغط على البطاقة لسماع النطق</p>
+  </section>
+
+  <!-- ================= شاشة التدرب على النطق ================= -->
+  <section id="screen-speak" class="screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="stopAll(); showScreen('menu')">⬅ رجوع</button>
+      <span class="hud" id="speak-hud">0 ✅ | 0 ❌</span>
+    </div>
+
+    <h2 id="speak-title">انطق الحرف</h2>
+    <p class="sub" id="speak-inst">اضغط على المايكروفون ثم انطق الحرف بوضوح</p>
+
+    <div class="letter-card" id="speak-letter-card" onclick="speakTargetLetter()">
+      <div class="letter-big" id="speak-letter">أ</div>
+    </div>
+
+    <div class="word-card" id="speak-word-card">
+      <div class="word-emoji" id="speak-emoji">🦁</div>
+      <div class="word-text" id="speak-word">أسد</div>
+    </div>
+
+    <div class="mic-row">
+      <button class="mic-btn" id="mic-btn" onclick="toggleListening()" title="اضغط للتحدث">🎤</button>
+    </div>
+    <div class="mic-hint" id="mic-hint">اضغط 🎤 وقل الحرف</div>
+    <div class="heard-box" id="heard-box"></div>
+
+    <div class="nav-row" style="margin-top:14px">
+      <button class="nav-btn" onclick="prevSpeakLetter()">⬅ السابق</button>
+      <button class="nav-btn" onclick="nextSpeakLetter()">التالي ➡</button>
+    </div>
+
+    <div id="speak-warn" class="warn-box" style="display:none">
+      ⚠️ متصفحك لا يدعم التعرف على الصوت. استخدم Chrome أو Edge.
+    </div>
+  </section>
+
+  <!-- ================= شاشة التدريب / الاختبار ================= -->
+  <section id="screen-game" class="screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="stopAll(); showScreen('menu')">⬅ رجوع</button>
+      <span class="hud" id="game-hud">⭐ 0</span>
+    </div>
+
+    <div class="question-text" id="question-text"></div>
+    <div class="prompt-area" id="prompt-area"></div>
+    <div class="options" id="options-area"></div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+
+  <!-- ================= شاشة النتائج ================= -->
+  <section id="screen-result" class="screen">
+    <div class="result-box">
+      <h2 id="result-title">انتهى الاختبار! 🎉</h2>
+      <div class="result-stars" id="result-stars">⭐⭐⭐</div>
+      <div class="result-score" id="result-score">0 / 10</div>
+      <div class="result-msg" id="result-msg"></div>
+      <div class="nav-row" style="grid-template-columns:1fr;">
+        <button class="nav-btn" onclick="startGame('quiz')">🔁 إعادة الاختبار</button>
+      </div>
+      <div class="nav-row" style="grid-template-columns:1fr; margin-top:12px;">
+        <button class="nav-btn" style="background:linear-gradient(135deg,#8e9eab,#667db6)" onclick="showScreen('menu')">🏠 القائمة الرئيسية</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================
+   1) بيانات الحروف والكلمات
+   ========================================================= */
+
+const AR_LETTERS = [
+  { l: 'أ', n: 'ألف',  w: 'أسد',      e: '🦁' },
+  { l: 'ب', n: 'باء',  w: 'بطة',      e: '🦆' },
+  { l: 'ت', n: 'تاء',  w: 'تفاحة',    e: '🍎' },
+  { l: 'ث', n: 'ثاء',  w: 'ثعلب',     e: '🦊' },
+  { l: 'ج', n: 'جيم',  w: 'جمل',      e: '🐪' },
+  { l: 'ح', n: 'حاء',  w: 'حصان',     e: '🐴' },
+  { l: 'خ', n: 'خاء',  w: 'خروف',     e: '🐑' },
+  { l: 'د', n: 'دال',  w: 'دجاجة',    e: '🐔' },
+  { l: 'ذ', n: 'ذال',  w: 'ذئب',      e: '🐺' },
+  { l: 'ر', n: 'راء',  w: 'ريشة',     e: '🪶' },
+  { l: 'ز', n: 'زاي',  w: 'زرافة',    e: '🦒' },
+  { l: 'س', n: 'سين',  w: 'سمكة',     e: '🐟' },
+  { l: 'ش', n: 'شين',  w: 'شمس',      e: '☀️' },
+  { l: 'ص', n: 'صاد',  w: 'صقر',      e: '🦅' },
+  { l: 'ض', n: 'ضاد',  w: 'ضفدع',     e: '🐸' },
+  { l: 'ط', n: 'طاء',  w: 'طائرة',    e: '✈️' },
+  { l: 'ظ', n: 'ظاء',  w: 'ظرف',      e: '✉️' },
+  { l: 'ع', n: 'عين',  w: 'عين',      e: '👁️' },
+  { l: 'غ', n: 'غين',  w: 'غزال',     e: '🦌' },
+  { l: 'ف', n: 'فاء',  w: 'فيل',      e: '🐘' },
+  { l: 'ق', n: 'قاف',  w: 'قمر',      e: '🌙' },
+  { l: 'ك', n: 'كاف',  w: 'كتاب',     e: '📚' },
+  { l: 'ل', n: 'لام',  w: 'ليمون',    e: '🍋' },
+  { l: 'م', n: 'ميم',  w: 'موز',      e: '🍌' },
+  { l: 'ن', n: 'نون',  w: 'نحلة',     e: '🐝' },
+  { l: 'ه', n: 'هاء',  w: 'هدية',     e: '🎁' },
+  { l: 'و', n: 'واو',  w: 'وردة',     e: '🌹' },
+  { l: 'ي', n: 'ياء',  w: 'يد',       e: '✋' }
+];
+
+const EN_LETTERS = [
+  { l: 'A', n: 'ay',        w: 'Apple',      e: '🍎' },
+  { l: 'B', n: 'bee',       w: 'Ball',       e: '⚽' },
+  { l: 'C', n: 'see',       w: 'Cat',        e: '🐱' },
+  { l: 'D', n: 'dee',       w: 'Dog',        e: '🐶' },
+  { l: 'E', n: 'ee',        w: 'Elephant',   e: '🐘' },
+  { l: 'F', n: 'eff',       w: 'Fish',       e: '🐟' },
+  { l: 'G', n: 'jee',       w: 'Grapes',     e: '🍇' },
+  { l: 'H', n: 'aitch',     w: 'Horse',      e: '🐴' },
+  { l: 'I', n: 'eye',       w: 'Ice Cream',  e: '🍦' },
+  { l: 'J', n: 'jay',       w: 'Juice',      e: '🧃' },
+  { l: 'K', n: 'kay',       w: 'Key',        e: '🔑' },
+  { l: 'L', n: 'el',        w: 'Lion',       e: '🦁' },
+  { l: 'M', n: 'em',        w: 'Monkey',     e: '🐵' },
+  { l: 'N', n: 'en',        w: 'Nose',       e: '👃' },
+  { l: 'O', n: 'oh',        w: 'Orange',     e: '🍊' },
+  { l: 'P', n: 'pee',       w: 'Panda',      e: '🐼' },
+  { l: 'Q', n: 'cue',       w: 'Queen',      e: '👑' },
+  { l: 'R', n: 'ar',        w: 'Rabbit',     e: '🐰' },
+  { l: 'S', n: 'ess',       w: 'Sun',        e: '☀️' },
+  { l: 'T', n: 'tee',       w: 'Tiger',      e: '🐯' },
+  { l: 'U', n: 'you',       w: 'Umbrella',   e: '☂️' },
+  { l: 'V', n: 'vee',       w: 'Violin',     e: '🎻' },
+  { l: 'W', n: 'double you',w: 'Watermelon', e: '🍉' },
+  { l: 'X', n: 'ex',        w: 'Xylophone',  e: '🎹' },
+  { l: 'Y', n: 'why',       w: 'Yo-Yo',      e: '🪀' },
+  { l: 'Z', n: 'zee',       w: 'Zebra',      e: '🦓' }
+];
+
+const TOTAL_QUIZ_QUESTIONS = 10;
+
+/* =========================================================
+   2) حالة اللعبة
+   ========================================================= */
+
+const state = {
+  lang: 'ar',
+  mode: 'practice',
+  letterIndex: 0,
+  score: 0,
+  qNum: 0,
+  totalQ: TOTAL_QUIZ_QUESTIONS,
+  currentQ: null,
+  answered: false,
+  locked: false,
+  // إحصائيات التدرب على النطق
+  speakOk: 0,
+  speakNo: 0,
+  speakIndex: 0
+};
+
+/* =========================================================
+   3) أدوات مساعدة
+   ========================================================= */
+
+function currentLetters() { return state.lang === 'ar' ? AR_LETTERS : EN_LETTERS; }
+function langCode() { return state.lang === 'ar' ? 'ar-SA' : 'en-US'; }
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function randInt(n) { return Math.floor(Math.random() * n); }
+function pickRandom(arr) { return arr[randInt(arr.length)]; }
+function $(id) { return document.getElementById(id); }
+
+/* =========================================================
+   4) تطبيع الحروف العربية والإنجليزية للمقارنة
+   ========================================================= */
+
+function stripDiacritics(s) {
+  return String(s).replace(/[\u064B-\u0652\u0670\u0640]/g, '');
+}
+
+function normalizeArabic(s) {
+  let t = stripDiacritics(s);
+  t = t
+    .replace(/[أإآٱ]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ؤ/g, 'و')
+    .replace(/ئ/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/[^\u0621-\u064A]/g, '')
+    .trim();
+  return t;
+}
+
+function normalizeEnglish(s) {
+  return String(s).toLowerCase().replace(/[^a-z]/g, '').trim();
+}
+
+function normalizeForLang(s, lang) {
+  return lang === 'ar' ? normalizeArabic(s) : normalizeEnglish(s);
+}
+
+/* =========================================================
+   5) النطق (Text To Speech)
+   ========================================================= */
+
+let voices = [];
+function loadVoices() {
+  if ('speechSynthesis' in window) {
+    voices = window.speechSynthesis.getVoices() || [];
+  }
+}
+if ('speechSynthesis' in window) {
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+  setTimeout(loadVoices, 300);
+  setTimeout(loadVoices, 1200);
+}
+
+function stopSpeaking() {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+}
+
+function findVoice(code) {
+  const prefix = code.slice(0, 2).toLowerCase();
+  return voices.find(v => v.lang && v.lang.toLowerCase() === code.toLowerCase()) ||
+         voices.find(v => v.lang && v.lang.toLowerCase().startsWith(prefix)) ||
+         null;
+}
+
+function speak(text, code) {
+  if (!('speechSynthesis' in window) || !text) return;
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(String(text));
+    u.lang = code || langCode();
+    const v = findVoice(u.lang);
+    if (v) u.voice = v;
+    u.rate = 0.8;
+    u.pitch = 1.1;
+    u.volume = 1;
+    window.speechSynthesis.speak(u);
+  } catch (e) { /* تجاهل */ }
+}
+
+// نطق الحرف: نستخدم اسم الحرف لأن نطق الحرف المفرد قد يكون غير واضح
+function speakLetterOf(item) {
+  speak(item.n, langCode());
+}
+function speakWordOf(item) {
+  speak(item.w, langCode());
+}
+
+/* =========================================================
+   6) التنقل بين الشاشات
+   ========================================================= */
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $('screen-' + name).classList.add('active');
+  if (name === 'home' || name === 'menu') stopAll();
+}
+
+function stopAll() {
+  stopSpeaking();
+  stopListening();
+  state.locked = false;
+}
+
+function startLang(lang) {
+  state.lang = lang;
+  $('menu-lang').textContent = lang === 'ar' ? 'العربية 🇸🇦' : 'English 🇬🇧';
+  showScreen('menu');
+}
+
+/* =========================================================
+   7) وضع التعلّم
+   ========================================================= */
+
+function startLearn() {
+  state.letterIndex = 0;
+  showScreen('learn');
+  renderLearn(true);
+}
+
+function renderLearn(autoSpeak) {
+  const list = currentLetters();
+  const item = list[state.letterIndex];
+  $('learn-letter').textContent = item.l;
+  $('learn-emoji').textContent = item.e;
+  const wEl = $('learn-word');
+  wEl.textContent = item.w;
+  wEl.classList.toggle('en', state.lang === 'en');
+  $('learn-progress').textContent = (state.letterIndex + 1) + ' / ' + list.length;
+  $('prev-btn').disabled = state.letterIndex === 0;
+  $('next-btn').disabled = state.letterIndex === list.length - 1;
+  if (autoSpeak) speakLetterOf(item);
+}
+
+function speakCurrentLetter() { speakLetterOf(currentLetters()[state.letterIndex]); }
+function speakCurrentWord() { speakWordOf(currentLetters()[state.letterIndex]); }
+
+function nextLetter() {
+  if (state.letterIndex < currentLetters().length - 1) {
+    state.letterIndex++;
+    renderLearn(true);
+  }
+}
+function prevLetter() {
+  if (state.letterIndex > 0) {
+    state.letterIndex--;
+    renderLearn(true);
+  }
+}
+
+/* =========================================================
+   8) التدرب على النطق (Speech Recognition)
+   ========================================================= */
+
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isListening = false;
+
+function startSpeak() {
+  state.speakOk = 0;
+  state.speakNo = 0;
+  state.speakIndex = 0;
+  showScreen('speak');
+  const ar = state.lang === 'ar';
+  $('speak-title').textContent = ar ? 'انطق الحرف' : 'Say the letter';
+  $('speak-inst').textContent = ar
+    ? 'اضغط على المايكروفون ثم انطق الحرف بوضوح'
+    : 'Press the microphone and say the letter clearly';
+  $('speak-warn').style.display = SpeechRec ? 'none' : 'block';
+  $('mic-btn').disabled = !SpeechRec;
+  renderSpeak();
+}
+
+function renderSpeak() {
+  const list = currentLetters();
+  const item = list[state.speakIndex];
+  $('speak-letter').textContent = item.l;
+  $('speak-emoji').textContent = item.e;
+  const wEl = $('speak-word');
+  wEl.textContent = item.w;
+  wEl.classList.toggle('en', state.lang === 'en');
+  $('speak-hud').textContent = state.speakOk + ' ✅ | ' + state.speakNo + ' ❌';
+  setMicHint(state.lang === 'ar' ? 'اضغط 🎤 وقل الحرف' : 'Press 🎤 and say the letter', '');
+  $('heard-box').innerHTML = '';
+}
+
+function setMicHint(text, cls) {
+  const h = $('mic-hint');
+  h.textContent = text;
+  h.className = 'mic-hint' + (cls ? ' ' + cls : '');
+}
+
+function speakTargetLetter() { speakLetterOf(currentLetters()[state.speakIndex]); }
+
+function nextSpeakLetter() {
+  stopListening();
+  state.speakIndex = (state.speakIndex + 1) % currentLetters().length;
+  renderSpeak();
+}
+function prevSpeakLetter() {
+  stopListening();
+  const n = currentLetters().length;
+  state.speakIndex = (state.speakIndex - 1 + n) % n;
+  renderSpeak();
+}
+
+function toggleListening() {
+  if (isListening) stopListening();
+  else startListening();
+}
+
+function startListening() {
+  if (!SpeechRec) return;
+  stopSpeaking();
+  const ar = state.lang === 'ar';
+  try {
+    recognition = new SpeechRec();
+    recognition.lang = langCode();
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 6;
+    recognition.continuous = false;
+
+    recognition.onstart = () => {
+      isListening = true;
+      $('mic-btn').classList.add('listening');
+      setMicHint(ar ? '🎧 أستمع إليك...' : '🎧 Listening...', 'listen');
+    };
+    recognition.onresult = (ev) => {
+      const res = ev.results[0];
+      const alts = [];
+      for (let i = 0; i < res.length; i++) alts.push(res[i].transcript);
+      handleHeard(alts);
+    };
+    recognition.onerror = (ev) => {
+      isListening = false;
+      $('mic-btn').classList.remove('listening');
+      let msg = ar ? 'حدث خطأ، حاول مرة أخرى' : 'Error, try again';
+      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
+        msg = ar ? 'يرجى السماح باستخدام المايكروفون' : 'Please allow microphone access';
+      } else if (ev.error === 'no-speech') {
+        msg = ar ? 'لم أسمع شيئًا، حاول مرة أخرى' : "I didn't hear anything, try again";
+      }
+      setMicHint(msg, 'no');
+    };
+    recognition.onend = () => {
+      isListening = false;
+      $('mic-btn').classList.remove('listening');
+    };
+    recognition.start();
+  } catch (e) {
+    isListening = false;
+    $('mic-btn').classList.remove('listening');
+    setMicHint(ar ? 'تعذّر تشغيل المايكروفون' : 'Could not start the microphone', 'no');
+  }
+}
+
+function stopListening() {
+  if (recognition) {
+    try { recognition.abort(); } catch (e) { /* تجاهل */ }
+  }
+  isListening = false;
+  const mb = $('mic-btn');
+  if (mb) mb.classList.remove('listening');
+}
+
+function isSpeechMatch(alts, item) {
+  const lang = state.lang;
+  const targets = [item.l, item.n, item.w]
+    .map(t => normalizeForLang(t, lang))
+    .filter(Boolean);
+  const wordNorm = normalizeForLang(item.w, lang);
+  for (const alt of alts) {
+    const n = normalizeForLang(alt, lang);
+    if (!n) continue;
+    if (targets.includes(n)) return true;
+    if (wordNorm && n.includes(wordNorm)) return true;
+    // الإنجليزية: قد يرجع المتعرف الحرف مكررًا أو بنطق قريب
+    if (lang === 'en' && n.length <= 2 && n[0] === item.l.toLowerCase()) return true;
+  }
+  return false;
+}
+
+function handleHeard(alts) {
+  const ar = state.lang === 'ar';
+  const item = currentLetters()[state.speakIndex];
+  $('heard-box').innerHTML = (ar ? 'سمعتُ: ' : 'I heard: ') + '<b>' + escapeHtml(alts[0] || '') + '</b>';
+  if (isSpeechMatch(alts, item)) {
+    state.speakOk++;
+    setMicHint(ar ? '🎉 ممتاز! نطق صحيح' : '🎉 Great! Correct', 'ok');
+    speak(ar ? 'أحسنت' : 'Well done', langCode());
+  } else {
+    state.speakNo++;
+    setMicHint(ar ? '🙂 حاول مرة أخرى' : '🙂 Try again', 'no');
+  }
+  $('speak-hud').textContent = state.speakOk + ' ✅ | ' + state.speakNo + ' ❌';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+/* =========================================================
+   9) التدريب والاختبار
+   ========================================================= */
+
+const QTYPES = ['wordToLetter', 'letterToWord', 'listenToLetter'];
+
+function startGame(mode) {
+  stopAll();
+  state.mode = mode;
+  state.score = 0;
+  state.qNum = 0;
+  state.totalQ = mode === 'quiz' ? TOTAL_QUIZ_QUESTIONS : Infinity;
+  showScreen('game');
+  nextQuestion();
+}
+
+function updateGameHud() {
+  if (state.mode === 'quiz') {
+    $('game-hud').textContent = '⭐ ' + state.score + '  |  ' + Math.min(state.qNum, state.totalQ) + '/' + state.totalQ;
+  } else {
+    $('game-hud').textContent = '⭐ ' + state.score;
+  }
+}
+
+function makeOptions(correctItem, count) {
+  const others = shuffle(currentLetters().filter(x => x.l !== correctItem.l)).slice(0, count - 1);
+  return shuffle([correctItem].concat(others));
+}
+
+function nextQuestion() {
+  if (state.mode === 'quiz' && state.qNum >= state.totalQ) {
+    finishQuiz();
+    return;
+  }
+  state.qNum++;
+  state.answered = false;
+  state.locked = false;
+  $('feedback').textContent = '';
+  $('feedback').className = 'feedback';
+  updateGameHud();
+
+  const ar = state.lang === 'ar';
+  const list = currentLetters();
+  const target = pickRandom(list);
+  const type = pickRandom(QTYPES);
+  const options = makeOptions(target, 4);
+  state.currentQ = { type, target, options };
+
+  const qt = $('question-text');
+  const pa = $('prompt-area');
+  const oa = $('options-area');
+  pa.onclick = null;
+  oa.innerHTML = '';
+
+  if (type === 'wordToLetter') {
+    qt.innerHTML = ar
+      ? 'بأي حرف تبدأ هذه الكلمة؟<span class="en-line">Which letter does this word start with?</span>'
+      : 'Which letter does this word start with?';
+    pa.innerHTML = '<div class="prompt-emoji">' + target.e + '</div>' +
+      '<div class="prompt-word' + (ar ? '' : ' en') + '">' + escapeHtml(target.w) + '</div>';
+    pa.onclick = () => speakWordOf(target);
+    options.forEach(o => oa.appendChild(makeLetterBtn(o, target)));
+    speakWordOf(target);
+  } else if (type === 'letterToWord') {
+    qt.innerHTML = ar
+      ? 'اختر الكلمة التي تبدأ بهذا الحرف<span class="en-line">Pick the word that starts with this letter</span>'
+      : 'Pick the word that starts with this letter';
+    pa.innerHTML = '<div class="prompt-letter">' + escapeHtml(target.l) + '</div>';
+    pa.onclick = () => speakLetterOf(target);
+    options.forEach(o => oa.appendChild(makeWordBtn(o, target)));
+    speakLetterOf(target);
+  } else {
+    qt.innerHTML = ar
+      ? 'استمع جيدًا ثم اختر الحرف الصحيح<span class="en-line">Listen and choose the right letter</span>'
+      : 'Listen and choose the right letter';
+    pa.innerHTML = '<div class="prompt-emoji">🔊</div>' +
+      '<div class="prompt-word' + (ar ? '' : ' en') + '" style="font-size:20px">' +
+      (ar ? 'اضغط لإعادة الاستماع' : 'Tap to listen again') + '</div>';
+    pa.onclick = () => speakLetterOf(target);
+    options.forEach(o => oa.appendChild(makeLetterBtn(o, target)));
+    setTimeout(() => speakLetterOf(target), 250);
+  }
+}
+
+function makeLetterBtn(item, target) {
+  const b = document.createElement('button');
+  b.className = 'opt letter-opt';
+  b.textContent = item.l;
+  b.onclick = () => onAnswer(b, item.l === target.l);
+  return b;
+}
+
+function makeWordBtn(item, target) {
+  const b = document.createElement('button');
+  b.className = 'opt word-opt';
+  b.innerHTML = '<span class="opt-emoji">' + item.e + '</span>' +
+    '<span class="opt-word"' + (state.lang === 'en' ? ' style="direction:ltr"' : '') + '>' + escapeHtml(item.w) + '</span>';
+  b.onclick = () => onAnswer(b, item.l === target.l);
+  return b;
+}
+
+function onAnswer(btn, isCorrect) {
+  if (state.answered || state.locked) return;
+  state.answered = true;
+  state.locked = true;
+  const ar = state.lang === 'ar';
+  const fb = $('feedback');
+
+  // تعطيل الأزرار وإظهار الإجابة الصحيحة
+  const btns = Array.from($('options-area').children);
+  btns.forEach(b => b.disabled = true);
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    state.score++;
+    fb.textContent = ar ? '🎉 أحسنت! إجابة صحيحة' : '🎉 Great job! Correct';
+    fb.className = 'feedback ok';
+    speak(ar ? 'أحسنت' : 'Great job', langCode());
+  } else {
+    btn.classList.add('wrong');
+    const target = state.currentQ.target;
+    btns.forEach(b => {
+      const t = state.currentQ.type === 'letterToWord'
+        ? b.querySelector('.opt-word') && b.querySelector('.opt-word').textContent === target.w
+        : b.textContent === target.l;
+      if (t) b.classList.add('correct');
+    });
+    fb.textContent = ar ? '😅 حاول مرة أخرى في السؤال التالي' : '😅 Try again on the next one';
+    fb.className = 'feedback no';
+  }
+  updateGameHud();
+
+  setTimeout(() => {
+    state.locked = false;
+    nextQuestion();
+  }, 1700);
+}
+
+function finishQuiz() {
+  const ar = state.lang === 'ar';
+  const total = state.totalQ;
+  const ratio = state.score / total;
+  let stars = '⭐';
+  let msg = ar ? 'استمر في التدرب، ستتحسن!' : 'Keep practicing, you will get better!';
+  if (ratio >= 0.9) {
+    stars = '⭐⭐⭐';
+    msg = ar ? 'رائع جدًا! أنت بطل الحروف 🏅' : 'Amazing! You are a letters champion 🏅';
+  } else if (ratio >= 0.6) {
+    stars = '⭐⭐';
+    msg = ar ? 'عمل جيد! واصل التقدم 👏' : 'Good work! Keep it up 👏';
+  }
+  $('result-title').textContent = ar ? 'انتهى الاختبار! 🎉' : 'Quiz finished! 🎉';
+  $('result-stars').textContent = stars;
+  $('result-score').textContent = state.score + ' / ' + total;
+  $('result-msg').textContent = msg;
+  showScreen('result');
+  speak(msg.replace(/[^\u0600-\u06FFa-zA-Z0-9 !,.]/g, ''), langCode());
+}
+
+// إيقاف الصوت عند مغادرة الصفحة
+window.addEventListener('beforeunload', stopAll);
+</script>
+</body>
+</html>
